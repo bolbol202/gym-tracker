@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
+  <title>متابعة التمرين - Plan v2.3 Final</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#111827; --card2:#172033; --text:#f8fafc;
+      --muted:#94a3b8; --accent:#22c55e; --accent2:#38bdf8; --danger:#ef4444;
+      --border:#273449; --gold:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Tahoma,sans-serif;background:linear-gradient(180deg,#08101c,#0b1220 40%);color:var(--text)}
+    .app{max-width:1050px;margin:auto;padding:14px}
+    .header{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.94);backdrop-filter:blur(10px);padding:12px 0 10px}
+    h1{font-size:24px;margin:0 0 6px}
+    .sub{color:var(--muted);font-size:13px}
+    .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    select,button,input,textarea{font:inherit}
+    select,.btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+    .btn{cursor:pointer;font-weight:700}
+    .btn.primary{background:var(--accent);color:#04130a;border:none}
+    .btn.secondary{background:var(--card2)}
+    .btn.danger{background:#3a1518;color:#fecaca;border-color:#7f1d1d}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+    .stat{background:var(--card);border:1px solid var(--border);padding:12px;border-radius:14px;text-align:center}
+    .stat b{display:block;font-size:20px;color:var(--accent2)}
+    .day-tabs{display:flex;gap:7px;overflow:auto;padding:4px 0 10px}
+    .day-tab{flex:0 0 auto;padding:10px 13px;border-radius:999px;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:pointer}
+    .day-tab.active{background:var(--accent2);color:#06121a;border-color:transparent;font-weight:800}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin:10px 0;overflow:hidden}
+    .exercise-head{display:flex;align-items:center;gap:10px;padding:14px}
+    .check{width:23px;height:23px;accent-color:var(--accent);flex:0 0 auto}
+    .ex-title{flex:1}
+    .ex-title h3{font-size:16px;margin:0 0 5px}
+    .meta{font-size:12px;color:var(--muted)}
+    .tech{margin-top:8px;padding:9px 10px;border-radius:10px;background:#0c1525;color:#dbeafe;font-size:12px;line-height:1.6}.badge{font-size:11px;padding:5px 8px;border-radius:999px;background:#263248;color:#dbeafe}
+    .badge.pr{background:#4a3405;color:#fde68a}
+    .video-btn{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:8px 11px;border-radius:10px;background:#dc2626;color:white;text-decoration:none;font-size:12px;font-weight:700;border:0}
+    .video-btn:active{transform:scale(.98)}
+    .fields{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px 14px}
+    label{font-size:11px;color:var(--muted)}
+    input,textarea{width:100%;margin-top:5px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1525;color:var(--text)}
+    textarea{min-height:42px;resize:vertical}
+    .notes{grid-column:1/-1}
+    .done{opacity:.68}
+    .done .ex-title h3{text-decoration:line-through}
+    .footer-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0 80px}
+    .tip{background:#102136;border:1px solid #1e3a5f;color:#dbeafe;padding:12px;border-radius:14px;font-size:13px;line-height:1.7}
+    .empty{padding:30px;text-align:center;color:var(--muted)}
+    .week-note{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+    .week-note textarea{min-height:70px}
+    @media(max-width:700px){
+      .fields{grid-template-columns:1fr 1fr}
+      .summary{grid-template-columns:repeat(3,1fr)}
+      .toolbar{grid-template-columns:1fr 1fr}
+      h1{font-size:20px}
+      .footer-actions{grid-template-columns:1fr}
+    }
+  
+    .compact-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:10px 0;overflow:hidden}
+    .compact-panel summary{cursor:pointer;padding:13px 14px;font-weight:800;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .compact-panel summary::-webkit-details-marker{display:none}
+    .food-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+    .food-item{display:flex;align-items:center;gap:9px;background:#0c1525;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13px}
+    .food-item input{width:20px;height:20px;margin:0;accent-color:var(--accent)}
+    .food-progress{color:var(--accent2);font-size:12px}
+    .image-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-inline-start:7px;padding:8px 11px;border-radius:10px;background:#334155;color:white;text-decoration:none;font-size:12px;font-weight:700;border:0;cursor:pointer}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:14px}
+    .modal.open{display:flex}
+    .modal-box{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .modal-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .modal-head h3{margin:0;flex:1}
+    .close-btn{border:0;background:#3a1518;color:#fecaca;border-radius:10px;padding:8px 11px;cursor:pointer}
+    .step-images{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .step-images img{width:100%;aspect-ratio:1/1;object-fit:contain;background:white;border-radius:12px}
+    .modal-note{margin-top:10px;background:#0c1525;border-radius:10px;padding:10px;line-height:1.7;color:#dbeafe;font-size:13px}
+    .image-fallback{display:none;padding:18px;text-align:center;color:var(--muted)}
+    @media(max-width:600px){.food-grid{grid-template-columns:1fr}.step-images{grid-template-columns:1fr 1fr}}
+
+
+    .previous-log{margin-top:8px;padding:9px 10px;border-radius:10px;background:#102b22;border:1px solid #1f5b43;color:#d1fae5;font-size:12px;line-height:1.6}
+    .previous-log.empty{background:#252a36;border-color:#374151;color:#cbd5e1}
+    .food-wrap{padding:0 12px 12px}
+    .macro-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+    .macro-box{background:#0c1525;border:1px solid var(--border);border-radius:10px;padding:9px 6px;text-align:center}
+    .macro-box b{display:block;color:var(--accent2);font-size:14px}
+    .macro-box span{font-size:10px;color:var(--muted)}
+    .meal-card{background:#0c1525;border:1px solid var(--border);border-radius:12px;margin:8px 0;overflow:hidden}
+    .meal-card h4{margin:0;padding:10px 12px;background:#121d30;font-size:13px}
+    .meal-items{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px}
+    .food-item.optional{border-style:dashed;color:#fde68a}
+    .food-note{padding:9px 11px;border-radius:10px;background:#2b220d;color:#fde68a;font-size:12px;line-height:1.6;margin:8px 0}
+    .food-note strong{color:#fbbf24}
+    .optional-title{font-size:12px;color:#fde68a;padding:3px 2px}
+    .image-source-note{margin-top:7px;color:var(--muted);font-size:11px}
+    @media(max-width:600px){
+      .macro-strip{grid-template-columns:1fr 1fr}
+      .meal-items{grid-template-columns:1fr}
+    }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>متابعة التمرين — Plan v2.3 Final</h1>
+    <div class="sub">12 أسبوع • سجل الأسبوع السابق • صور لكل تمرين • نظام الأكل بالجرام</div>
+
+    <div class="toolbar">
+      <select id="weekSelect"></select>
+      <button class="btn primary" id="todayBtn">اذهب لأسبوع البداية</button>
+    </div>
+
+    <div class="summary">
+      <div class="stat"><b id="doneCount">0</b><span>تمرين مكتمل</span></div>
+      <div class="stat"><b id="totalCount">0</b><span>إجمالي التمارين</span></div>
+      <div class="stat"><b id="progress">0%</b><span>التزام الأسبوع</span></div>
+    </div>
+
+    <div class="day-tabs" id="dayTabs"></div>
+  </div>
+
+  <div class="tip">
+    سجّل أقوى وزن استخدمته في المجموعة الأفضل، وعدد العدات وRIR الحقيقي. البيانات تتحفظ تلقائيًا داخل المتصفح.
+  </div>
+
+  <div class="week-note">
+    <label>ملاحظات الأسبوع: النوم، الألم، الطاقة، الوزن، الوسط</label>
+    <textarea id="weekNotes" placeholder="مثال: متوسط الوزن 96.8 كجم، النوم 7 ساعات، ألم الكوع 0/10..."></textarea>
+  </div>
+
+
+  <div id="exerciseList"></div>
+
+  <details class="compact-panel" open>
+    <summary>
+      <span>🍽️ نظام الأكل — اليوم المحدد</span>
+      <span class="food-progress" id="foodProgress">0/15</span>
+    </summary>
+    <div class="food-wrap">
+      <div class="macro-strip">
+        <div class="macro-box"><b>≈ 1800</b><span>سعرة</span></div>
+        <div class="macro-box"><b>≈ 210 جم</b><span>بروتين</span></div>
+        <div class="macro-box"><b>120–125 جم</b><span>كارب</span></div>
+        <div class="macro-box"><b>≈ 50 جم</b><span>دهون</span></div>
+      </div>
+      <div id="foodGrid"></div>
+    </div>
+  </details>
+
+  <div class="footer-actions">
+    <button class="btn secondary" id="exportBtn">تصدير نسخة احتياطية</button>
+    <button class="btn secondary" id="importBtn">استيراد نسخة</button>
+    <button class="btn danger" id="resetBtn">مسح كل البيانات</button>
+    <input type="file" id="importFile" accept=".json" hidden>
+  </div>
+</div>
+
+<div class="modal" id="exerciseModal" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">صورة التمرين</h3>
+      <button class="close-btn" id="closeModal">إغلاق</button>
+    </div>
+    <div class="step-images" id="stepImages">
+      <img id="stepImg1" alt="بداية الحركة" loading="lazy">
+      <img id="stepImg2" alt="نهاية الحركة" loading="lazy">
+    </div>
+    <div class="image-fallback" id="imageFallback">الصورة غير متاحة لهذا التمرين حاليًا. استخدم زر الفيديو.</div>
+    <div class="modal-note" id="modalNote"></div>
+  </div>
+</div>
+
+<script>
+const plan = {
+  "Push A": [
+    ["Incline Dumbbell Press","دامبل","3","6–8","RIR 1","ميل البنش 20–30°، لوح الكتف ثابت للخلف. البديل: Incline Chest Press Machine"],
+    ["Flat Dumbbell Press","دامبل","3","8–10","RIR 1","الكوع 45–60°، نزول بتحكم. البديل: Flat Chest Press Machine"],
+    ["Pec Deck Fly","جهاز","2","10–15","RIR 1–2","المرفق ثابت بانحناءة بسيطة، اقفل بالصدر. البديل: Middle Cable Fly"],
+    ["Machine Shoulder Press","جهاز","3","8–10","RIR 1–2","المقابض قرب مستوى الأذن، الظهر ثابت. البديل: Smith Shoulder Press"],
+    ["Standing Dumbbell Lateral Raise","دامبل","3","12–15","RIR 1–2","ارفع بالكوع لمستوى الكتف من غير مرجحة. البديل: Seated Dumbbell Lateral Raise"],
+    ["One Arm Dumbbell Overhead Extension","دامبل","3","10–12","RIR 1–2","الكوع ثابت بجانب الرأس. البديل: One Arm Cable Overhead Extension"],
+    ["Rope Pushdown","كابل","2","12–15","آخر مجموعة RIR 0–1","الكوع ثابت وافتح طرفي الحبل أسفل الحركة. البديل: Straight Bar Pushdown"]
+  ],
+  "Pull A": [
+    ["Lat Pulldown","كابل/جهاز","3","6–10","RIR 1","قبضة Overhand أعرض قليلًا من الكتف؛ اسحب لأعلى الصدر والكوع لتحت. البديل: Assisted Pull-Up بنفس القبضة"],
+    ["Chest Supported Row Machine","جهاز","3","8–12","RIR 1","المقابض القريبة Neutral؛ الكوع قريب 30–45°، السحب لأعلى البطن/أسفل الضلوع. البديل: Chest Supported Dumbbell Row"],
+    ["Iso-Lateral Row Machine","جهاز","3","10–12","RIR 1–2","قبضة Neutral، ذراع بذراع، اسحب الكوع ناحية الحوض. البديل: One Arm Cable Row"],
+    ["Face Pull","كابل","2","12–15","RIR 1–2","الحبل ناحية الوجه والكوع مفتوح. البديل: Rear-Delt Cable Row"],
+    ["Incline Dumbbell Curl","دامبل","3","8–12","RIR 1–2","الذراع خلف الجسم والكوع ثابت. البديل: Standing Alternating Dumbbell Curl"],
+    ["Preacher Curl","جهاز أو EZ","3","10–15","آخر مجموعة RIR 0–1","ثبت العضد على الوسادة ولا تفرد الكوع بعنف. البديل: Machine Preacher Curl"]
+  ],
+  "Legs": [
+    ["Hack Squat","جهاز","3","6–8","RIR 1","الركبة مع اتجاه الأصابع، انزل لمدى ثابت. البديل: Leg Press"],
+    ["Romanian Deadlift","بار أو دامبل","3","8–10","RIR 1","ادفع الحوض للخلف والظهر محايد. البديل: Smith Romanian Deadlift"],
+    ["Leg Press","جهاز","3","10–12","RIR 1–2","لا ترفع الحوض من الكرسي ولا تقفل الركبة بعنف. البديل: Pendulum Squat"],
+    ["Leg Curl","جهاز","3","10–12","RIR 1–2","الحوض ثابت واعصر الهامسترنج. البديل: Seated أو Lying Leg Curl"],
+    ["Leg Extension","جهاز","3","12–15","RIR 1–2","محور الجهاز مع الركبة وارفع بتحكم. البديل: Single-Leg Extension"],
+    ["Standing Calf Raise","جهاز","4","10–15","آخر مجموعة RIR 0–1","نزول كامل وتوقف أعلى الحركة من غير نط. البديل: Leg Press Calf Raise"]
+  ],
+  "Push B": [
+    ["High Cable Fly","كابل","2","12–15","RIR 1–2","البكرات عالية واسحب لأسفل وأمام ناحية أسفل الصدر. البديل: Decline Cable Fly"],
+    ["Low Cable Fly","كابل","2","12–15","RIR 1–2","البكرات منخفضة واجمع لأعلى ناحية أعلى الصدر. البديل: Low-to-High Single Arm Fly"],
+    ["Machine Chest Press","جهاز","3","8–10","RIR 1","المقابض في مستوى منتصف الصدر. البديل: Smith Flat Press"],
+    ["Seated Dumbbell Shoulder Press","دامبل","3","8–10","RIR 1","الكوع أسفل الرسغ ولا تقوس أسفل الظهر. البديل: Arnold Press لو مريح"],
+    ["Seated Dumbbell Lateral Raise","دامبل","3","12–15","RIR 1–2","من الجلوس لتقليل المرجحة، ارفع بالكوع. البديل: Standing Dumbbell Lateral Raise"],
+    ["Overhead Rope Extension","كابل","3","10–12","RIR 1–2","الكوع ثابت فوق الرأس وخد تمدد مريح. البديل: One Arm Dumbbell Overhead Extension"],
+    ["Cable Kickback","كابل","2","12–15","آخر مجموعة RIR 0–1","العضد ثابت خلف الجسم وافرد الكوع بالكامل. البديل: Dumbbell Kickback"]
+  ],
+  "Pull B": [
+    ["Assisted Pull-Up","جهاز","3","6–10","RIR 1","قبضة Neutral متوسطة؛ الكفان مواجهان لبعض، اسحب الصدر ناحية المقابض. البديل: Neutral-Grip Lat Pulldown"],
+    ["Chest Supported T-Bar Row Machine","جهاز","3","8–12","RIR 1","المقابض الواسعة أو Overhand؛ الكوع مفتوح 60–75°، السحب لأسفل الصدر. البديل: Wide-Grip Chest Supported Row"],
+    ["Straight Arm Pulldown","كابل","2","12–15","RIR 1–2","بار مستقيم أو حبل، الكوع شبه ثابت، اسحب للفخذ. البديل: Machine Pullover"],
+    ["Reverse Pec Deck","جهاز","3","12–15","RIR 1–2","الذراع في مستوى الكتف، افتح للخلف من غير رفع الترابيس. البديل: Rear Delt Cable Fly"],
+    ["Back Extension","جهاز/بنش","2","12–15","RIR 2–3","الحركة من مفصل الحوض، اطلع لحد الجسم مستقيم فقط. البديل: 45° Hip Extension"],
+    ["Hammer Curl","دامبل","3","10–12","RIR 1–2","قبضة Neutral والكوع ثابت. البديل: Rope Hammer Curl"],
+    ["Bayesian Cable Curl","كابل","3","12–15","آخر مجموعة RIR 0–1","البكرة منخفضة خلفك، الذراع خلف الجسم والكوع ثابت. البديل: Spider Curl أو Cable Curl بالبار"]
+  ],
+  "Abs": [
+    ["Cable Crunch","كابل","3","12–15","RIR 1–2","لف القفص الصدري ناحية الحوض. البديل: Machine Crunch"],
+    ["Reverse Crunch","وزن جسم","3","12–15","RIR 1–2","ارفع الحوض ناحية القفص الصدري من غير رمي الرجل. البديل: Bent-Knee Leg Raise"],
+    ["Vacuum","تنفس وتحكم","3","20–30 ثانية","مريح","بعد الزفير اسحب البطن للداخل. البديل: Dead Bug"]
+  ]
+};
+
+
+const exerciseImages = {"Incline Dumbbell Press": ["Incline_Dumbbell_Press"], "Flat Dumbbell Press": ["Dumbbell_Bench_Press"], "Pec Deck Fly": ["Butterfly", "Cable_Crossover"], "Machine Shoulder Press": ["Machine_Shoulder_Military_Press", "Dumbbell_Shoulder_Press"], "Standing Dumbbell Lateral Raise": ["Side_Lateral_Raise"], "One Arm Dumbbell Overhead Extension": ["Dumbbell_One-Arm_Triceps_Extension", "Standing_One-Arm_Dumbbell_Triceps_Extension"], "Rope Pushdown": ["Triceps_Pushdown_-_Rope_Attachment"], "Lat Pulldown": ["Wide-Grip_Lat_Pulldown", "Close-Grip_Front_Lat_Pulldown"], "Chest Supported Row Machine": ["Dumbbell_Incline_Row", "Lying_T-Bar_Row"], "Iso-Lateral Row Machine": ["Leverage_High_Row", "One-Arm_Dumbbell_Row"], "Face Pull": ["Face_Pull", "Reverse_Flyes"], "Incline Dumbbell Curl": ["Alternate_Incline_Dumbbell_Curl"], "Preacher Curl": ["Preacher_Curl"], "Hack Squat": ["Hack_Squat"], "Romanian Deadlift": ["Romanian_Deadlift"], "Leg Press": ["Leg_Press"], "Leg Curl": ["Lying_Leg_Curls", "Seated_Leg_Curl"], "Leg Extension": ["Leg_Extensions"], "Standing Calf Raise": ["Standing_Calf_Raises"], "High Cable Fly": ["Cable_Crossover", "Cable_Iron_Cross"], "Low Cable Fly": ["Cable_Crossover"], "Machine Chest Press": ["Leverage_Chest_Press", "Chest_Press"], "Seated Dumbbell Shoulder Press": ["Dumbbell_Shoulder_Press"], "Seated Dumbbell Lateral Raise": ["Seated_Side_Lateral_Raise", "Side_Lateral_Raise"], "Overhead Rope Extension": ["Cable_Rope_Overhead_Triceps_Extension", "Triceps_Overhead_Extension_with_Rope"], "Cable Kickback": ["Tricep_Dumbbell_Kickback", "Cable_One_Arm_Tricep_Extension"], "Assisted Pull-Up": ["Band_Assisted_Pull-Up", "Pullups"], "Chest Supported T-Bar Row Machine": ["Lying_T-Bar_Row", "T-Bar_Row_with_Handle"], "Straight Arm Pulldown": ["Straight-Arm_Pulldown"], "Reverse Pec Deck": ["Reverse_Flyes"], "Back Extension": ["Hyperextensions_Back_Extensions", "Hyperextensions_With_No_Hyperextension_Bench"], "Hammer Curl": ["Hammer_Curls"], "Bayesian Cable Curl": ["Standing_Biceps_Cable_Curl", "Cable_Hammer_Curls_-_Rope_Attachment"], "Cable Crunch": ["Cable_Crunch"], "Reverse Crunch": ["Reverse_Crunch"], "Vacuum": ["Stomach_Vacuum"]};
+const foodPlan = [{"title": "🍽️ Meal 1 — 10:00 صباحًا", "items": [{"id": "m1_eggs", "text": "🥚 4 بيضات كاملة", "required": true}, {"id": "m1_toast", "text": "🍞 2 شريحة توست زيرو", "required": true}, {"id": "m1_cheese", "text": "🧀 20 جم موتزاريلا لايت", "required": true}, {"id": "m1_veg", "text": "🥬 خيار + خس + طماطم (مفتوح)", "required": true}]}, {"title": "🍽️ Meal 2 — 12:30", "items": [{"id": "m2_yogurt", "text": "🥣 عبوة زبادي بوني بروتين — 10 جم بروتين", "required": true}, {"id": "m2_banana", "text": "🍌 موزة متوسطة", "required": true}, {"id": "m2_chia", "text": "🌱 10 جم شيا", "required": true}, {"id": "pre_coffee", "text": "☕ قهوة سوداء قبل التمرين (اختياري)", "required": false}]}, {"title": "🍽️ Meal 3 — بعد التمرين", "items": [{"id": "m3_chicken", "text": "🍗 500 جم صدور فراخ — وزن نيء", "required": true}, {"id": "m3_rice", "text": "🍚 80 جم رز بسمتي — وزن نيء", "required": true}, {"id": "m3_salad", "text": "🥗 سلطة كبيرة جدًا", "required": true}]}, {"title": "🍽️ Meal 4 — قبل 6 مساءً", "items": [{"id": "m4_cottage", "text": "🧀 300 جم جبنة قريش", "required": true}, {"id": "m4_veg", "text": "🥒 خيار + خس", "required": true}]}, {"title": "💧 يوميًا", "items": [{"id": "water", "text": "💧 4 لتر مياه على الأقل — 4.5 لتر لو الجو حر أو العرق عالي", "required": true}, {"id": "creatine", "text": "💊 5 جم كرياتين", "required": true}, {"id": "salt", "text": "🧂 الملح ثابت كل يوم", "required": true}]}];
+const hungryOptions = [{"id": "hungry_lupin", "text": "🌰 100 جم ترمس"}, {"id": "hungry_chicken", "text": "🍗 100 جم فراخ زيادة"}];
+
+const STORAGE_KEY = "gym_tracker_plan_v2_1_final";
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"weeks":{},"weekNotes":{}}');
+let currentWeek = 1;
+let currentDay = "Push A";
+
+const weekSelect = document.getElementById("weekSelect");
+for(let i=1;i<=12;i++){
+  const opt=document.createElement("option");
+  opt.value=i; opt.textContent=`الأسبوع ${i}`;
+  weekSelect.appendChild(opt);
+}
+weekSelect.value=currentWeek;
+
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function ensureEntry(week,day,index){
+  state.weeks[week] ??= {};
+  state.weeks[week][day] ??= {};
+  state.weeks[week][day][index] ??= {done:false,weight:"",reps:"",rir:"",notes:""};
+  return state.weeks[week][day][index];
+}
+
+function bestWeight(exerciseName){
+  let max = null;
+  Object.values(state.weeks || {}).forEach(w=>{
+    Object.entries(w).forEach(([day, entries])=>{
+      (plan[day]||[]).forEach((ex, idx)=>{
+        if(ex[0]===exerciseName && entries[idx]){
+          const val=parseFloat(entries[idx].weight);
+          if(!isNaN(val)) max=max===null?val:Math.max(max,val);
+        }
+      });
+    });
+  });
+  return max;
+}
+
+function renderTabs(){
+  const tabs=document.getElementById("dayTabs");
+  tabs.innerHTML="";
+  Object.keys(plan).forEach(day=>{
+    const b=document.createElement("button");
+    b.className="day-tab"+(day===currentDay?" active":"");
+    b.textContent=day;
+    b.onclick=()=>{currentDay=day;render()};
+    tabs.appendChild(b);
+  });
+}
+
+
+
+function foodKey(){ return `week-${currentWeek}-${currentDay}`; }
+
+function requiredFoodItems(){
+  return foodPlan.flatMap(meal=>meal.items).filter(item=>item.required);
+}
+
+function renderFood(){
+  state.food ??= {};
+  state.food[foodKey()] ??= {};
+  const grid=document.getElementById("foodGrid");
+  if(!grid) return;
+  grid.innerHTML="";
+
+  foodPlan.forEach(meal=>{
+    const card=document.createElement("div");
+    card.className="meal-card";
+    const title=document.createElement("h4");
+    title.textContent=meal.title;
+    const items=document.createElement("div");
+    items.className="meal-items";
+
+    meal.items.forEach(item=>{
+      const row=document.createElement("label");
+      row.className="food-item"+(item.required?"":" optional");
+      row.innerHTML=`<input type="checkbox" ${state.food[foodKey()][item.id]?"checked":""}><span>${item.text}</span>`;
+      row.querySelector("input").onchange=e=>{
+        state.food[foodKey()][item.id]=e.target.checked;
+        save();
+        updateFoodProgress();
+      };
+      items.appendChild(row);
+    });
+
+    card.appendChild(title);
+    card.appendChild(items);
+    grid.appendChild(card);
+  });
+
+  const optional=document.createElement("div");
+  optional.className="meal-card";
+  optional.innerHTML=`<h4>لو جعان — اختار واحد فقط، مش الاتنين</h4><div class="meal-items" id="hungryChoices"></div>`;
+  grid.appendChild(optional);
+
+  const choiceBox=optional.querySelector("#hungryChoices");
+  hungryOptions.forEach(item=>{
+    const row=document.createElement("label");
+    row.className="food-item optional";
+    row.innerHTML=`<input type="checkbox" ${state.food[foodKey()][item.id]?"checked":""}><span>${item.text}</span>`;
+    row.querySelector("input").onchange=e=>{
+      hungryOptions.forEach(other=>state.food[foodKey()][other.id]=false);
+      state.food[foodKey()][item.id]=e.target.checked;
+      save();
+      renderFood();
+    };
+    choiceBox.appendChild(row);
+  });
+
+  const note=document.createElement("div");
+  note.className="food-note";
+  note.innerHTML="<strong>قاعدة الخطة:</strong> لو جعان اختار 100 جم ترمس أو 100 جم فراخ زيادة، مش الاتنين مع بعض.";
+  grid.appendChild(note);
+
+  updateFoodProgress();
+}
+
+function updateFoodProgress(){
+  const d=(state.food&&state.food[foodKey()])||{};
+  const required=requiredFoodItems();
+  const done=required.filter(item=>d[item.id]).length;
+  const el=document.getElementById("foodProgress");
+  if(el) el.textContent=`${done}/${required.length}`;
+}
+
+
+function fallbackExerciseSvg(name,phase){
+  const safeName=String(name).replace(/[&<>"']/g,"");
+  const isStart=phase==="البداية";
+  const armY=isStart?88:62;
+  const legX=isStart?72:86;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
+    <rect width="720" height="720" rx="28" fill="#f8fafc"/>
+    <rect x="18" y="18" width="684" height="684" rx="24" fill="#e2e8f0" stroke="#94a3b8" stroke-width="4"/>
+    <text x="360" y="60" text-anchor="middle" font-family="Arial" font-size="27" font-weight="700" fill="#0f172a">${safeName}</text>
+    <text x="360" y="100" text-anchor="middle" font-family="Arial" font-size="22" fill="#2563eb">وضع ${phase}</text>
+    <g transform="translate(210 145)" stroke="#0f172a" stroke-width="16" stroke-linecap="round" fill="none">
+      <circle cx="150" cy="72" r="38" fill="#cbd5e1"/>
+      <line x1="150" y1="112" x2="150" y2="285"/>
+      <line x1="150" y1="155" x2="70" y2="${armY}"/>
+      <line x1="150" y1="155" x2="230" y2="${armY}"/>
+      <line x1="150" y1="285" x2="${legX}" y2="410"/>
+      <line x1="150" y1="285" x2="${300-legX}" y2="410"/>
+      <circle cx="70" cy="${armY}" r="18" fill="#334155"/>
+      <circle cx="230" cy="${armY}" r="18" fill="#334155"/>
+    </g>
+    <path d="M180 600 H540" stroke="#22c55e" stroke-width="12" stroke-linecap="round"/>
+    <path d="M510 574 L548 600 L510 626" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="360" y="670" text-anchor="middle" font-family="Arial" font-size="18" fill="#475569">رسم مبسط احتياطي — استخدم الفيديو للتكنيك الكامل</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+
+function loadImage(url){
+  return new Promise((resolve,reject)=>{
+    const image=new Image();
+    image.onload=()=>resolve(url);
+    image.onerror=reject;
+    image.src=url;
+  });
+}
+
+async function openExerciseImage(name,note){
+  const modal=document.getElementById("exerciseModal");
+  const candidates=exerciseImages[name]||[];
+  document.getElementById("modalTitle").textContent=name;
+  document.getElementById("modalNote").innerHTML=`<b>القبضة والتنفيذ:</b> ${note}<div class="image-source-note">لو الصورة من تمرين قريب في نفس الحركة، نفّذ القبضة والتعليمات المكتوبة في البرنامج.</div>`;
+  const box=document.getElementById("stepImages");
+  const fallback=document.getElementById("imageFallback");
+  const img1=document.getElementById("stepImg1");
+  const img2=document.getElementById("stepImg2");
+  fallback.style.display="none";
+  box.style.display="grid";
+  img1.src=fallbackExerciseSvg(name,"البداية");
+  img2.src=fallbackExerciseSvg(name,"النهاية");
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+
+  for(const id of candidates){
+    const base=`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${id}`;
+    const first=`${base}/0.jpg`;
+    const second=`${base}/1.jpg`;
+    try{
+      const loaded=await Promise.all([loadImage(first),loadImage(second)]);
+      img1.src=loaded[0];
+      img2.src=loaded[1];
+      return;
+    }catch(_err){
+      // Try the next candidate. Built-in SVG remains visible.
+    }
+  }
+}
+
+const closeModalBtn=document.getElementById("closeModal");
+const exerciseModalEl=document.getElementById("exerciseModal");
+if(closeModalBtn && exerciseModalEl){
+  closeModalBtn.onclick=()=>exerciseModalEl.classList.remove("open");
+  exerciseModalEl.onclick=e=>{
+    if(e.target.id==="exerciseModal") e.currentTarget.classList.remove("open");
+  };
+}
+
+
+function previousExerciseLog(week,day,index){
+  for(let w=week-1;w>=1;w--){
+    const item=state.weeks?.[w]?.[day]?.[index];
+    if(item && (item.weight || item.reps || item.rir || item.setsDone || item.done)){
+      return {week:w,...item};
+    }
+  }
+  return null;
+}
+
+function previousLogHtml(previous){
+  if(currentWeek===1) return "";
+  if(!previous) return `<div class="previous-log empty"><b>آخر تسجيل:</b> لا يوجد تسجيل سابق لهذا التمرين.</div>`;
+  const parts=[];
+  if(previous.weight) parts.push(`${previous.weight} كجم`);
+  if(previous.reps) parts.push(`${previous.reps} عدة`);
+  if(previous.setsDone) parts.push(`${previous.setsDone} مجموعات`);
+  if(previous.rir!=="") parts.push(`RIR ${previous.rir}`);
+  return `<div class="previous-log"><b>آخر تسجيل — الأسبوع ${previous.week}:</b> ${parts.join(" • ") || "تم تنفيذ التمرين"}</div>`;
+}
+
+function render(){
+  renderTabs();
+  renderFood();
+  const list=document.getElementById("exerciseList");
+  list.innerHTML="";
+  const exercises=plan[currentDay]||[];
+  exercises.forEach((ex,idx)=>{
+    const data=ensureEntry(currentWeek,currentDay,idx);
+    const currentPR=bestWeight(ex[0]);
+    const previous=previousExerciseLog(currentWeek,currentDay,idx);
+    const card=document.createElement("div");
+    card.className="card"+(data.done?" done":"");
+    card.innerHTML=`
+      <div class="exercise-head">
+        <input class="check" type="checkbox" ${data.done?"checked":""}>
+        <div class="ex-title">
+          <h3>${idx+1}. ${ex[0]}</h3>
+          <div class="meta">${ex[1]} • ${ex[2]} مجموعات × ${ex[3]} عدات • ${ex[4]}</div>
+          <div class="tech"><b>القبضة والتنفيذ/البديل:</b> ${ex[5]}</div>
+          ${previousLogHtml(previous)}
+          <a class="video-btn"
+             href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex[0] + ' proper form tutorial')}"
+             target="_blank" rel="noopener noreferrer">▶ شاهد طريقة التمرين</a><button class="image-btn" data-exercise="${ex[0]}" data-note="${ex[5]}">🖼️ شاهد صورة التمرين</button>
+        </div>
+        ${currentPR!==null?`<span class="badge pr">PR ${currentPR} كجم</span>`:`<span class="badge">بدون رقم</span>`}
+      </div>
+      <div class="fields">
+        <label>أقوى وزن كجم<input inputmode="decimal" data-key="weight" value="${data.weight}"></label>
+        <label>العدات<input inputmode="numeric" data-key="reps" value="${data.reps}"></label>
+        <label>RIR<input inputmode="numeric" data-key="rir" value="${data.rir}"></label>
+        <label>المجموعات المنفذة<input inputmode="numeric" data-key="setsDone" value="${data.setsDone||""}"></label>
+        <label class="notes">ملاحظات<textarea data-key="notes">${data.notes}</textarea></label>
+      </div>`;
+    card.querySelector(".check").onchange=e=>{
+      data.done=e.target.checked; save(); render();
+    };
+    card.querySelectorAll("[data-key]").forEach(inp=>{
+      inp.oninput=e=>{
+        data[e.target.dataset.key]=e.target.value; save(); updateSummary();
+      };
+    });
+    
+    card.querySelectorAll(".image-btn").forEach(btn=>{
+      btn.onclick=()=>openExerciseImage(btn.dataset.exercise,btn.dataset.note);
+    });
+
+    list.appendChild(card);
+  });
+  const wn = state.weekNotes[currentWeek] || "";
+  document.getElementById("weekNotes").value=wn;
+  updateSummary();
+}
+
+function updateSummary(){
+  let done=0,total=0;
+  Object.keys(plan).forEach(day=>{
+    plan[day].forEach((_,idx)=>{
+      total++;
+      if(ensureEntry(currentWeek,day,idx).done) done++;
+    });
+  });
+  document.getElementById("doneCount").textContent=done;
+  document.getElementById("totalCount").textContent=total;
+  document.getElementById("progress").textContent=Math.round(done/total*100)+"%";
+}
+
+weekSelect.onchange=e=>{currentWeek=parseInt(e.target.value);render()};
+document.getElementById("todayBtn").onclick=()=>{currentWeek=1;weekSelect.value=1;render()};
+document.getElementById("weekNotes").oninput=e=>{
+  state.weekNotes[currentWeek]=e.target.value; save();
+};
+
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="gym-tracker-backup.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("importBtn").onclick=()=>document.getElementById("importFile").click();
+document.getElementById("importFile").onchange=e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      state=JSON.parse(reader.result);
+      save(); render(); alert("تم استيراد البيانات بنجاح");
+    }catch{ alert("الملف غير صالح"); }
+  };
+  reader.readAsText(file);
+};
+
+document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("متأكد إنك عايز تمسح كل بيانات الـ12 أسبوع؟")){
+    state={weeks:{},weekNotes:{}}; save(); render();
+  }
+};
+
+render();
+</script>
+
+</body>
+</html>
