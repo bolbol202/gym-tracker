@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="theme-color" content="#111827" />
-  <title>متابعة التمرين - Plan v2.1 Final</title>
+  <title>متابعة التمرين - Plan v2.2 Smart</title>
   <style>
     :root{
       --bg:#0b1220; --card:#111827; --card2:#172033; --text:#f8fafc;
@@ -38,6 +38,8 @@
     .meta{font-size:12px;color:var(--muted)}
     .tech{margin-top:8px;padding:9px 10px;border-radius:10px;background:#0c1525;color:#dbeafe;font-size:12px;line-height:1.6}.badge{font-size:11px;padding:5px 8px;border-radius:999px;background:#263248;color:#dbeafe}
     .badge.pr{background:#4a3405;color:#fde68a}
+    .video-btn{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:8px 11px;border-radius:10px;background:#dc2626;color:white;text-decoration:none;font-size:12px;font-weight:700;border:0}
+    .video-btn:active{transform:scale(.98)}
     .fields{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px 14px}
     label{font-size:11px;color:var(--muted)}
     input,textarea{width:100%;margin-top:5px;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1525;color:var(--text)}
@@ -57,13 +59,34 @@
       h1{font-size:20px}
       .footer-actions{grid-template-columns:1fr}
     }
-  </style>
+  
+    .compact-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:10px 0;overflow:hidden}
+    .compact-panel summary{cursor:pointer;padding:13px 14px;font-weight:800;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .compact-panel summary::-webkit-details-marker{display:none}
+    .food-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+    .food-item{display:flex;align-items:center;gap:9px;background:#0c1525;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13px}
+    .food-item input{width:20px;height:20px;margin:0;accent-color:var(--accent)}
+    .food-progress{color:var(--accent2);font-size:12px}
+    .image-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-inline-start:7px;padding:8px 11px;border-radius:10px;background:#334155;color:white;text-decoration:none;font-size:12px;font-weight:700;border:0;cursor:pointer}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;align-items:center;justify-content:center;padding:14px}
+    .modal.open{display:flex}
+    .modal-box{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .modal-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .modal-head h3{margin:0;flex:1}
+    .close-btn{border:0;background:#3a1518;color:#fecaca;border-radius:10px;padding:8px 11px;cursor:pointer}
+    .step-images{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .step-images img{width:100%;aspect-ratio:1/1;object-fit:contain;background:white;border-radius:12px}
+    .modal-note{margin-top:10px;background:#0c1525;border-radius:10px;padding:10px;line-height:1.7;color:#dbeafe;font-size:13px}
+    .image-fallback{display:none;padding:18px;text-align:center;color:var(--muted)}
+    @media(max-width:600px){.food-grid{grid-template-columns:1fr}.step-images{grid-template-columns:1fr 1fr}}
+
+</style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <h1>متابعة التمرين — Plan v2.1 Final</h1>
-    <div class="sub">12 أسبوع • حفظ تلقائي على الجهاز • تتبع أقوى وزن والالتزام</div>
+    <h1>متابعة التمرين — Plan v2.2 Smart</h1>
+    <div class="sub">12 أسبوع • صور تُحمّل عند الطلب • أكل يومي • حفظ تلقائي</div>
 
     <div class="toolbar">
       <select id="weekSelect"></select>
@@ -87,6 +110,15 @@
     <label>ملاحظات الأسبوع: النوم، الألم، الطاقة، الوزن، الوسط</label>
     <textarea id="weekNotes" placeholder="مثال: متوسط الوزن 96.8 كجم، النوم 7 ساعات، ألم الكوع 0/10..."></textarea>
   </div>
+
+  
+  <details class="compact-panel" open>
+    <summary>
+      <span>🍽️ أكل اليوم</span>
+      <span class="food-progress" id="foodProgress">0/8</span>
+    </summary>
+    <div class="food-grid" id="foodGrid"></div>
+  </details>
 
   <div id="exerciseList"></div>
 
@@ -150,6 +182,19 @@ const plan = {
   ]
 };
 
+
+const exerciseImages = {"Incline Dumbbell Press": "Incline_Dumbbell_Press", "Flat Dumbbell Press": "Dumbbell_Bench_Press", "Pec Deck Fly": "Butterfly", "Machine Shoulder Press": "Machine_Shoulder_(Military)_Press", "Standing Dumbbell Lateral Raise": "Side_Lateral_Raise", "One Arm Dumbbell Overhead Extension": "One-Arm_Dumbbell_Triceps_Extension", "Rope Pushdown": "Triceps_Pushdown_-_Rope_Attachment", "Lat Pulldown": "Wide-Grip_Lat_Pulldown", "Chest Supported Row Machine": "Chest_Supported_Row", "Iso-Lateral Row Machine": "Leverage_High_Row", "Face Pull": "Face_Pull", "Incline Dumbbell Curl": "Alternate_Incline_Dumbbell_Curl", "Preacher Curl": "Preacher_Curl", "Hack Squat": "Hack_Squat", "Romanian Deadlift": "Romanian_Deadlift", "Leg Press": "Leg_Press", "Leg Curl": "Lying_Leg_Curls", "Leg Extension": "Leg_Extensions", "Standing Calf Raise": "Standing_Calf_Raises", "High Cable Fly": "Cable_Crossover", "Low Cable Fly": "Cable_Crossover", "Machine Chest Press": "Leverage_Chest_Press", "Seated Dumbbell Shoulder Press": "Dumbbell_Shoulder_Press", "Seated Dumbbell Lateral Raise": "Seated_Side_Lateral_Raise", "Overhead Rope Extension": "Cable_Rope_Overhead_Triceps_Extension", "Cable Kickback": "Cable_One_Arm_Tricep_Extension", "Assisted Pull-Up": "Assisted_Pull-Up", "Chest Supported T-Bar Row Machine": "T-Bar_Row_with_Handle", "Straight Arm Pulldown": "Straight-Arm_Pulldown", "Reverse Pec Deck": "Reverse_Flyes", "Back Extension": "Hyperextensions_(Back_Extensions)", "Hammer Curl": "Hammer_Curls", "Bayesian Cable Curl": "Standing_Biceps_Cable_Curl", "Cable Crunch": "Cable_Crunch", "Reverse Crunch": "Reverse_Crunch", "Vacuum": "Stomach_Vacuum"};
+const foodItems = [
+  "4 بيضات",
+  "زبادي يوناني",
+  "تفاحة",
+  "وجبة بروتين رئيسية (فراخ/لحمة/سمك)",
+  "رز أو بطاطس حسب الخطة",
+  "خضار أو سلطة",
+  "المياه",
+  "الكرياتين"
+];
+
 const STORAGE_KEY = "gym_tracker_plan_v2_1_final";
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"weeks":{},"weekNotes":{}}');
 let currentWeek = 1;
@@ -199,8 +244,64 @@ function renderTabs(){
   });
 }
 
+
+function foodKey(){ return `week-${currentWeek}`; }
+function renderFood(){
+  state.food ??= {};
+  state.food[foodKey()] ??= {};
+  const grid=document.getElementById("foodGrid");
+  if(!grid) return;
+  grid.innerHTML="";
+  foodItems.forEach((item,i)=>{
+    const row=document.createElement("label");
+    row.className="food-item";
+    row.innerHTML=`<input type="checkbox" ${state.food[foodKey()][i]?"checked":""}><span>${item}</span>`;
+    row.querySelector("input").onchange=e=>{
+      state.food[foodKey()][i]=e.target.checked;
+      save(); updateFoodProgress();
+    };
+    grid.appendChild(row);
+  });
+  updateFoodProgress();
+}
+function updateFoodProgress(){
+  const d=(state.food&&state.food[foodKey()])||{};
+  const done=foodItems.filter((_,i)=>d[i]).length;
+  const el=document.getElementById("foodProgress");
+  if(el) el.textContent=`${done}/${foodItems.length}`;
+}
+function openExerciseImage(name,note){
+  const modal=document.getElementById("exerciseModal");
+  const id=exerciseImages[name];
+  document.getElementById("modalTitle").textContent=name;
+  document.getElementById("modalNote").innerHTML=`<b>القبضة والتنفيذ:</b> ${note}`;
+  const box=document.getElementById("stepImages");
+  const fallback=document.getElementById("imageFallback");
+  const img1=document.getElementById("stepImg1");
+  const img2=document.getElementById("stepImg2");
+  fallback.style.display="none"; box.style.display="grid";
+  let failed=0;
+  const fail=()=>{ failed++; if(failed>=2){box.style.display="none";fallback.style.display="block";} };
+  if(id){
+    const base=`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${id}`;
+    img1.onerror=fail; img2.onerror=fail;
+    img1.src=`${base}/0.jpg`; img2.src=`${base}/1.jpg`;
+  }else{
+    box.style.display="none"; fallback.style.display="block";
+  }
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+}
+document.getElementById("closeModal").onclick=()=>{
+  document.getElementById("exerciseModal").classList.remove("open");
+};
+document.getElementById("exerciseModal").onclick=e=>{
+  if(e.target.id==="exerciseModal") e.currentTarget.classList.remove("open");
+};
+
 function render(){
   renderTabs();
+  renderFood();
   const list=document.getElementById("exerciseList");
   list.innerHTML="";
   const exercises=plan[currentDay]||[];
@@ -214,7 +315,11 @@ function render(){
         <input class="check" type="checkbox" ${data.done?"checked":""}>
         <div class="ex-title">
           <h3>${idx+1}. ${ex[0]}</h3>
-          <div class="meta">${ex[1]} • ${ex[2]} مجموعات × ${ex[3]} عدات • ${ex[4]}</div><div class="tech"><b>القبضة والتنفيذ/البديل:</b> ${ex[5]}</div>
+          <div class="meta">${ex[1]} • ${ex[2]} مجموعات × ${ex[3]} عدات • ${ex[4]}</div>
+          <div class="tech"><b>القبضة والتنفيذ/البديل:</b> ${ex[5]}</div>
+          <a class="video-btn"
+             href="https://www.youtube.com/results?search_query=${encodeURIComponent(ex[0] + ' proper form tutorial')}"
+             target="_blank" rel="noopener noreferrer">▶ شاهد طريقة التمرين</a><button class="image-btn" data-exercise="${ex[0]}" data-note="${ex[5]}">🖼️ شاهد صورة التمرين</button><button class="image-btn" data-exercise="${ex[0]}" data-note="${ex[5]}">🖼️ شاهد صورة التمرين</button>
         </div>
         ${currentPR!==null?`<span class="badge pr">PR ${currentPR} كجم</span>`:`<span class="badge">بدون رقم</span>`}
       </div>
@@ -233,6 +338,11 @@ function render(){
         data[e.target.dataset.key]=e.target.value; save(); updateSummary();
       };
     });
+    
+    card.querySelectorAll(".image-btn").forEach(btn=>{
+      btn.onclick=()=>openExerciseImage(btn.dataset.exercise,btn.dataset.note);
+    });
+
     list.appendChild(card);
   });
   const wn = state.weekNotes[currentWeek] || "";
@@ -289,5 +399,21 @@ document.getElementById("resetBtn").onclick=()=>{
 
 render();
 </script>
+
+<div class="modal" id="exerciseModal" aria-hidden="true">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">صورة التمرين</h3>
+      <button class="close-btn" id="closeModal">إغلاق</button>
+    </div>
+    <div class="step-images" id="stepImages">
+      <img id="stepImg1" alt="بداية الحركة" loading="lazy">
+      <img id="stepImg2" alt="نهاية الحركة" loading="lazy">
+    </div>
+    <div class="image-fallback" id="imageFallback">الصورة غير متاحة لهذا التمرين حاليًا. استخدم زر الفيديو.</div>
+    <div class="modal-note" id="modalNote"></div>
+  </div>
+</div>
+
 </body>
 </html>
