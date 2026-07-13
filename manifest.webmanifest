@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Gym Tracker — Plan v4.0",
+  "name": "Gym Tracker — Plan v4.1",
   "short_name": "Gym Tracker",
-  "description": "متابعة التمرين والأوزان والراحة والكارديو والأكل",
+  "description": "نسخة مصححة: صور الضهر الصحيحة، الصور عند الضغط فقط، ومؤقت راحة عملي",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
