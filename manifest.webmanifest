@@ -1,19 +1,15 @@
 {
   "id": "./",
-  "name": "Gym Tracker — متابعة التمرين",
+  "name": "Gym Tracker — Plan v4.0",
   "short_name": "Gym Tracker",
-  "description": "متابعة التمرين والأوزان والأكل الأسبوعي",
+  "description": "متابعة التمرين والأوزان والراحة والكارديو والأكل",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
   "orientation": "portrait",
-  "background_color": "#08111f",
+  "background_color": "#07101c",
   "theme_color": "#111827",
   "icons": [
     {
