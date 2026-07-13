@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Gym Tracker — Plan v4.1",
+  "name": "Gym Tracker — Plan v4.2",
   "short_name": "Gym Tracker",
-  "description": "نسخة مصححة: صور الضهر الصحيحة، الصور عند الضغط فقط، ومؤقت راحة عملي",
+  "description": "إصلاح نهائي لصور Low Row وChest Supported Row بأسماء ملفات جديدة لمنع الكاش",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",

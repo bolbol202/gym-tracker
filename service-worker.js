@@ -1,5 +1,5 @@
-const CACHE_NAME = "gym-tracker-v4-1-corrected";
-const CORE_ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./gym-device-1-a.jpg", "./gym-device-1-b.jpg", "./gym-device-1-c.jpg", "./gym-device-2-low-row.jpg", "./gym-device-3-upper-back.jpg", "./gym-device-4-chest-supported-row.jpg"];
+const CACHE_NAME = "gym-tracker-v4-2-image-cache-fix";
+const CORE_ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./gym-device-1-a.jpg", "./gym-device-1-b.jpg", "./gym-device-1-c.jpg", "./gym-device-2-low-row.jpg", "./gym-device-3-upper-back.jpg", "./gym-device-4-chest-supported-row.jpg", "./low-row-correct-v42.jpg", "./chest-supported-row-correct-v42.jpg"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
